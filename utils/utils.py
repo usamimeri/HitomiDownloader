@@ -83,3 +83,4 @@ class Util:
             url=f'https://{i[0]}a.hitomi.la/webp/{timestamp}/{i[1]}/{i[2]}.webp'
             urls.append(url)
         return urls
+    
