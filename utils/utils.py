@@ -69,7 +69,17 @@ class Util:
         return ['b' if subdomain in mapping else 'a' for subdomain in subdomains ]
 
 
-images_data=Util.get_image_infos('2581149')
-time_info=Util.get_time_info()
-subdomains=Util.get_subdomains(images_data['hash'])
-result=Util.get_mapping_result(subdomains,time_info['mapping'])
+    def get_image_urls(mapping_result:list,timestamp:str,subdomains:list,hash_list:list):
+        '''
+        根据：
+        1. 属于a还是b
+        2. 时间戳
+        3. subdomain
+        4. 哈希值
+        组合图片的url,返回url列表
+        '''
+        urls=[]
+        for i in zip(mapping_result,subdomains,hash_list):
+            url=f'https://{i[0]}a.hitomi.la/webp/{timestamp}/{i[1]}/{i[2]}.webp'
+            urls.append(url)
+        return urls
