@@ -47,8 +47,8 @@ class Util:
             timestamp=re.search(pattern=r'b:\s+\'(\d+)/\'',string=time_data).group(1)
             mapping=re.findall(pattern=r'case (\d+?):',string=time_data)
             infos={
-                'mapping':mapping,
-                'timestamp':timestamp,
+                'mapping':mapping, #映射表
+                'timestamp':timestamp, #时间戳
             }
             return infos
     def get_subdomains(hash_list:list):
