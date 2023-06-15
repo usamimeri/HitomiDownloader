@@ -7,6 +7,7 @@ import json
 from threading import BoundedSemaphore,Thread
 logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logging.captureWarnings(True)
+import time
 
 headers={
     'User-Agent':'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36',
@@ -134,11 +135,12 @@ class HitomiDownloader:
         self.image_infos=None
         self.image_urls=None
 
-    def by_url(self,url:str,thread_num:int=20):
+    def by_url(self,url:str,thread_num:int=10,delay:float=0.5):
         '''根据画廊页面url下载'''
         def start_download(url):
             semaphore.acquire()
             self.save_image(url)
+            time.sleep(delay)
             semaphore.release()
         self.image_urls,self.image_infos=Util.get_image_urls_by_url(url)
         #获取所有图片的url和详情
