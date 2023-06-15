@@ -1,11 +1,12 @@
 import requests
 import os
 import logging
-logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logging.captureWarnings(True)
 import re
 from requests.exceptions import HTTPError
 import json
+from threading import BoundedSemaphore,Thread
+logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.captureWarnings(True)
 
 headers={
     'User-Agent':'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36',
@@ -133,12 +134,20 @@ class HitomiDownloader:
         self.image_infos=None
         self.image_urls=None
 
-    def by_url(self,url:str):
+    def by_url(self,url:str,thread_num:int=20):
         '''根据画廊页面url下载'''
+        def start_download(url):
+            semaphore.acquire()
+            self.save_image(url)
+            semaphore.release()
         self.image_urls,self.image_infos=Util.get_image_urls_by_url(url)
         #获取所有图片的url和详情
-        for i in self.image_urls:
-            self.save_image(i)
+        semaphore = BoundedSemaphore(thread_num) #添加锁
+        threads=[Thread(target=start_download,args=(url,)) for url in self.image_urls] 
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
 
         
 
@@ -146,7 +155,6 @@ class HitomiDownloader:
         '''根据图片链接下载图片'''
         response = requests.get(url, headers=self.header)
         logging.info(f'正在下载图片:{url}')
-
         japanese_title=self.image_infos['japanese_title']
         if japanese_title:
             DIR_NAME=japanese_title
@@ -173,5 +181,5 @@ class HitomiDownloader:
             logging.error(f'下载图片{url}时发生错误', exc_info=True)
 
 downloader=HitomiDownloader()
-URL='https://hitomi.la/doujinshi/%E7%A8%B2%E5%A6%BB%E3%81%97%E3%81%A3%E3%81%BD%E3%82%8A%E6%B8%A9%E6%B3%89%E4%BC%91%E6%9A%87-%E6%97%A5%E6%9C%AC%E8%AA%9E-437077-2434139.html#1'
+URL=''
 downloader.by_url(URL)
